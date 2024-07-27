@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client'
 import bcrypt from 'bcrypt'
 import { Request, Response } from 'express'
+import { body } from 'express-validator'
 import prisma from '../config/db.js'
 import generateToken from '../utils/generate-token.js'
 
@@ -11,6 +12,19 @@ interface SignUpRequest extends Request {
 interface SignInRequest extends Request {
   body: Pick<Prisma.UserCreateInput, 'email' | 'password'>
 }
+
+const validateSignUp = [
+  body('email').isEmail().withMessage('Invalid email format'),
+  body('name').notEmpty().withMessage('Name is required'),
+  body('password')
+    .isLength({ min: 8 })
+    .withMessage('Password must be at least 8 characters long'),
+]
+
+const validateSignIn = [
+  body('email').isEmail().withMessage('Invalid email format'),
+  body('password').notEmpty().withMessage('Password is required'),
+]
 
 const signUp = async (req: SignUpRequest, res: Response) => {
   const { email, name, password } = req.body
@@ -97,4 +111,4 @@ const signIn = async (req: SignInRequest, res: Response) => {
   }
 }
 
-export { signIn, signUp }
+export { signIn, signUp, validateSignIn, validateSignUp }
