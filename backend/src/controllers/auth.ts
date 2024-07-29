@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt'
 import { Request, Response } from 'express'
 import { body } from 'express-validator'
 import prisma from '../config/db.js'
-import generateToken from '../utils/generate-token.js'
+import { generateToken } from '../utils/jwt.js'
 
 interface SignUpRequest extends Request {
   body: Pick<Prisma.UserCreateInput, 'email' | 'name' | 'password'>
@@ -55,9 +55,8 @@ const signUp = async (req: SignUpRequest, res: Response) => {
     return res.status(201).json({
       message: 'User created successfully',
       user: {
-        id: user.id,
-        email: user.email,
         name: user.name,
+        role: user.role,
       },
     })
   } catch (error) {
@@ -95,11 +94,10 @@ const signIn = async (req: SignInRequest, res: Response) => {
 
     return res.status(200).json({
       message: 'Sign in successful',
-      token: generateToken(user.id, user.email),
+      token: generateToken(user.name, user.role),
       user: {
-        id: user.id,
-        email: user.email,
         name: user.name,
+        role: user.role,
       },
     })
   } catch (error) {
