@@ -1,11 +1,11 @@
 import express from 'express'
-import router from './routes/router.js'
+import routes from './routes/index.js'
 
 const app = express()
 const port = 5174
 
 app.use(express.json())
-app.use(router)
+app.use(routes)
 
 app.listen(port, () => {
   console.log('Server is running on port:', port)

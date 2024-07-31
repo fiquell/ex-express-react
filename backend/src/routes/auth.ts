@@ -9,13 +9,6 @@ import validate from '../middlewares/validate.js'
 
 const router = express.Router()
 
-router.get('/', (req, res) => {
-  return res.status(200).json({
-    message: 'Success',
-    method: req.method,
-  })
-})
-
 router.post('/signup', validate(validateSignUp), signUp)
 router.post('/signin', validate(validateSignIn), signIn)
 
