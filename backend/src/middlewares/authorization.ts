@@ -1,17 +1,9 @@
-import { Prisma } from '@prisma/client'
-import { NextFunction, Request, Response } from 'express'
-import { JwtPayload } from 'jsonwebtoken'
+import { NextFunction, Response } from 'express'
+import { DecodedJwtPayload, Roles, UserRequest } from '../types/user.js'
 import { verifyToken } from '../utils/jwt.js'
 
-interface AuthorizationRequest extends Request {
-  user?: Prisma.UserCreateInput
-}
-
-type Roles = 'user' | 'admin'
-type DecodedJwtPayload = JwtPayload & Prisma.UserCreateInput
-
-const authorization = (roles: Roles) => {
-  return (req: AuthorizationRequest, res: Response, next: NextFunction) => {
+const authorization = (roles: Roles | Roles[]) => {
+  return (req: UserRequest, res: Response, next: NextFunction) => {
     const token = req.headers.authorization?.split(' ')[1]
 
     if (!token) {
@@ -22,8 +14,9 @@ const authorization = (roles: Roles) => {
 
     try {
       const decoded = verifyToken(token) as DecodedJwtPayload
+      const allowedRoles = Array.isArray(roles) ? roles : [roles]
 
-      if (roles.length && !roles.includes(decoded.role!)) {
+      if (!allowedRoles.includes(decoded.role as Roles)) {
         return res.status(403).json({
           message: 'Access denied. Insufficient permissions.',
         })

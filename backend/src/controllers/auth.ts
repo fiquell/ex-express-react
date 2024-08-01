@@ -1,17 +1,9 @@
-import { Prisma } from '@prisma/client'
 import bcrypt from 'bcrypt'
-import { Request, Response } from 'express'
+import { Response } from 'express'
 import { body } from 'express-validator'
 import prisma from '../config/db.js'
+import { BodyRequest } from '../types/user.js'
 import { generateToken } from '../utils/jwt.js'
-
-interface SignUpRequest extends Request {
-  body: Pick<Prisma.UserCreateInput, 'email' | 'name' | 'password'>
-}
-
-interface SignInRequest extends Request {
-  body: Pick<Prisma.UserCreateInput, 'email' | 'password'>
-}
 
 const validateSignUp = [
   body('email').isEmail().withMessage('Invalid email format'),
@@ -26,7 +18,7 @@ const validateSignIn = [
   body('password').notEmpty().withMessage('Password is required'),
 ]
 
-const signUp = async (req: SignUpRequest, res: Response) => {
+const signUp = async (req: BodyRequest, res: Response) => {
   const { email, name, password } = req.body
 
   try {
@@ -68,7 +60,7 @@ const signUp = async (req: SignUpRequest, res: Response) => {
   }
 }
 
-const signIn = async (req: SignInRequest, res: Response) => {
+const signIn = async (req: BodyRequest, res: Response) => {
   const { email, password } = req.body
 
   try {
@@ -94,7 +86,7 @@ const signIn = async (req: SignInRequest, res: Response) => {
 
     return res.status(200).json({
       message: 'Sign in successful',
-      token: generateToken(user.name, user.role),
+      token: generateToken(user.id, user.name, user.role),
       user: {
         name: user.name,
         role: user.role,
